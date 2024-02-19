@@ -27,7 +27,7 @@ impl egui_dock::TabViewer for TabViewer {
 
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
         ui.terminal(
-            self.handlers.entry(*tab).or_insert(TermHandler::new_from_str(&self.default_cmd))
+            self.handlers.entry(*tab).or_insert_with(|| TermHandler::new_from_str(&self.default_cmd))
         );
     }
 
