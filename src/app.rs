@@ -1,5 +1,6 @@
 use eframe::CreationContext;
 
+use egui::Response;
 use egui_dock::{DockState, NodeIndex, Style, SurfaceIndex};
 
 use std::collections::HashMap;
@@ -12,6 +13,9 @@ struct TabViewer {
     added_nodes: Vec<(SurfaceIndex, NodeIndex)>,
     closed_nodes: Vec<usize>,
     focus_follows_pointer: bool,
+    last_focus: usize,
+    current_focus: Option<usize>,
+    responses: HashMap<usize, Response>,
 }
 
 impl egui_dock::TabViewer for TabViewer {
@@ -37,6 +41,12 @@ impl egui_dock::TabViewer for TabViewer {
         if self.focus_follows_pointer && gui.hovered() {
             gui.request_focus();
         }
+
+        if gui.has_focus() {
+            self.current_focus = Some(*tab);
+        }
+
+        self.responses.insert(*tab, gui);
 
         // if term.is_closed() {
         //     self.closed_nodes.push(*tab);
@@ -67,6 +77,9 @@ impl App {
                 added_nodes: vec!(),
                 closed_nodes: vec!(),
                 focus_follows_pointer: true,
+                current_focus: None,
+                last_focus: 0,
+                responses: HashMap::new(),
             },
             tree: DockState::new(vec!(0)),
             counter: 1,
@@ -84,6 +97,9 @@ impl App {
 
 impl eframe::App for App {
     fn update (&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.viewer.current_focus = None;
+        self.viewer.responses.clear();
+
         egui_dock::DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
             .show_add_buttons(true)
@@ -114,6 +130,13 @@ impl eframe::App for App {
 
         if self.viewer.handlers.len() == 0 {
             self.exit();
+        }
+
+        // hack to fix focus issues in egui-terminal
+        if let Some(focus) = self.viewer.current_focus {
+            self.viewer.last_focus = focus;
+        } else {
+            self.viewer.responses.get(&self.viewer.last_focus).map(|r| r.request_focus());
         }
     }
 }
