@@ -22,7 +22,7 @@ impl egui_dock::TabViewer for TabViewer {
     fn title(&mut self, tab: &mut Self::Tab) -> egui::WidgetText {
         format!(
             "{} [{}]", 
-            self.handlers.get(tab)
+            self.handlers.get_mut(tab)
                 .map(|t| t.title("eguitty"))
                 .unwrap_or(String::from("")),
             tab,
@@ -45,9 +45,9 @@ impl egui_dock::TabViewer for TabViewer {
             self.current_focus = Some(*tab);
         }
 
-        // if term.is_closed() {
-        //     self.closed_nodes.push(*tab);
-        // }
+        if term.exit_status().is_some() {
+            self.closed_nodes.push(*tab);
+        }
     }
 
     fn on_close(&mut self, _tab: &mut Self::Tab) -> bool {
