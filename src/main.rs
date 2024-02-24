@@ -11,7 +11,7 @@ fn main () -> Result<(), eframe::Error> {
     };
 
     eframe::run_native(
-        "eguitty 0.1.0",
+        "eguitty 0.2.1",
         options,
         Box::new(App::setup),
     )
