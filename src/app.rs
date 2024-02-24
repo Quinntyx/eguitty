@@ -1,6 +1,5 @@
 use eframe::CreationContext;
 
-use egui::Response;
 use egui_dock::{DockState, NodeIndex, Style, SurfaceIndex};
 
 use std::collections::HashMap;
@@ -15,7 +14,6 @@ struct TabViewer {
     focus_follows_pointer: bool,
     last_focus: usize,
     current_focus: Option<usize>,
-    responses: HashMap<usize, Response>,
 }
 
 impl egui_dock::TabViewer for TabViewer {
@@ -38,6 +36,7 @@ impl egui_dock::TabViewer for TabViewer {
             term
         );
 
+
         if self.focus_follows_pointer && gui.hovered() {
             gui.request_focus();
         }
@@ -45,8 +44,6 @@ impl egui_dock::TabViewer for TabViewer {
         if gui.has_focus() {
             self.current_focus = Some(*tab);
         }
-
-        self.responses.insert(*tab, gui);
 
         // if term.is_closed() {
         //     self.closed_nodes.push(*tab);
@@ -79,7 +76,6 @@ impl App {
                 focus_follows_pointer: true,
                 current_focus: None,
                 last_focus: 0,
-                responses: HashMap::new(),
             },
             tree: DockState::new(vec!(0)),
             counter: 1,
@@ -98,7 +94,6 @@ impl App {
 impl eframe::App for App {
     fn update (&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.viewer.current_focus = None;
-        self.viewer.responses.clear();
 
         egui_dock::DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
@@ -136,7 +131,7 @@ impl eframe::App for App {
         if let Some(focus) = self.viewer.current_focus {
             self.viewer.last_focus = focus;
         } else {
-            self.viewer.responses.get(&self.viewer.last_focus).map(|r| r.request_focus());
+            self.tree.find_tab(&self.viewer.last_focus).map(|(a, b, _)| self.tree.set_focused_node_and_surface((a, b)));
         }
     }
 }
