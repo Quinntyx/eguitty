@@ -1,6 +1,6 @@
 use eframe::CreationContext;
 
-use egui_dock::{DockState, Style, NodeIndex, SurfaceIndex};
+use egui_dock::{DockState, NodeIndex, Style, SurfaceIndex};
 
 use std::collections::HashMap;
 
@@ -9,7 +9,9 @@ use egui_terminal::prelude::*;
 struct TabViewer {
     handlers: HashMap<usize, TermHandler>,
     default_cmd: String,
-    added_nodes: Vec<(SurfaceIndex, NodeIndex)>
+    added_nodes: Vec<(SurfaceIndex, NodeIndex)>,
+    closed_nodes: Vec<usize>,
+    focus_follows_pointer: bool,
 }
 
 impl egui_dock::TabViewer for TabViewer {
@@ -26,13 +28,23 @@ impl egui_dock::TabViewer for TabViewer {
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
-        ui.terminal(
-            self.handlers.entry(*tab).or_insert_with(|| TermHandler::new_from_str(&self.default_cmd))
+        let term = self.handlers.entry(*tab).or_insert_with(|| TermHandler::new_from_str(&self.default_cmd));
+        
+        let gui = ui.terminal(
+            term
         );
+
+        if self.focus_follows_pointer && gui.hovered() {
+            gui.request_focus();
+        }
+
+        // if term.is_closed() {
+        //     self.closed_nodes.push(*tab);
+        // }
     }
 
     fn on_close(&mut self, _tab: &mut Self::Tab) -> bool {
-        self.handlers.len() > 1
+        true
     }
 
     fn on_add(&mut self, surface: SurfaceIndex, node: NodeIndex) {
@@ -53,6 +65,8 @@ impl App {
                 handlers: HashMap::new(),
                 default_cmd: String::from("zsh"),
                 added_nodes: vec!(),
+                closed_nodes: vec!(),
+                focus_follows_pointer: true,
             },
             tree: DockState::new(vec!(0)),
             counter: 1,
@@ -61,6 +75,10 @@ impl App {
 
     pub fn setup (_cc: &CreationContext) -> Box<dyn eframe::App> {
         Box::new(Self::new())
+    }
+
+    pub fn exit (&self) {
+        std::process::exit(0);
     }
 }
 
@@ -86,5 +104,16 @@ impl eframe::App for App {
             self.tree.push_to_focused_leaf(self.counter);
             self.counter += 1;
         });
+
+        self.viewer.closed_nodes.drain(..).for_each(|tab| {
+            let tab = self.tree.find_tab(&tab);
+            if let Some(tab) = tab {
+                self.tree.remove_tab(tab);
+            }
+        });
+
+        if self.viewer.handlers.len() == 0 {
+            self.exit();
+        }
     }
 }
