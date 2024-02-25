@@ -29,6 +29,10 @@ impl egui_dock::TabViewer for TabViewer {
         ).into()
     }
 
+    fn allowed_in_windows(&self, _tab: &mut Self::Tab) -> bool {
+        false
+    }
+
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
         let term = self.handlers.entry(*tab).or_insert_with(|| TermHandler::new_from_str(&self.default_cmd));
         
