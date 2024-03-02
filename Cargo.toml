@@ -27,4 +27,4 @@ egui = { git = "https://github.com/quinntyx/egui" }
 eframe = { git = "https://github.com/quinntyx/egui" }
 egui_glow = { git = "https://github.com/quinntyx/egui" }
 egui-winit = { git = "https://github.com/quinntyx/egui" }
-egui_dock = { git = "https://github.com/Adanos020/egui_dock" }
+egui_dock = { git = "https://github.com/Adanos020/egui_dock", branch = "release-0.12" }
