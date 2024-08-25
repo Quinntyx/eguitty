@@ -8,13 +8,13 @@ description = ""
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-eframe = { version = "0.28.1", features = ["wgpu", "accesskit", "default_fonts", "wayland", "web_screen_reader", "x11", "serde"] }
-egui = { version = "0.28.1", features = ["serde"] }
-egui_dock = { version = "0.13.0", features = ["serde"] }
+eframe = { version = "0.26", default-features = false, features = ["wgpu", "accesskit", "default_fonts", "wayland", "web_screen_reader", "x11", "serde"] } # , git = "https://github.com/quinntyx/egui" }
+egui = { version = "0.26", features = ["serde"] } # , git = "https://github.com/quinntyx/egui" }
+egui-terminal = { git = "https://github.com/quinntyx/egui-terminal", features = ["serde"] } # , "serde-hexcolor"] }
+egui_dock = { version = "0.12", features = ["serde"] }
 ron = "0.8.1"
-serde = { version = "1.0.203", features = ["derive"] }
-serde_json = "1.0.117"
-egui-terminal = { path = "../egui-terminal", features = ["serde"] }
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.114"
 
 [profile.dev]
 opt-level = 3
